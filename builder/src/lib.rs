@@ -1,5 +1,6 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
+use proc_macro2::TokenTree;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
 
@@ -22,7 +23,7 @@ fn ty_inner_type(ty: &syn::Type) -> Option<&syn::Type> {
     None
 }
 
-#[proc_macro_derive(Builder)]
+#[proc_macro_derive(Builder, attributes(builder))]
 pub fn derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
     let name = &ast.ident;
@@ -69,6 +70,36 @@ pub fn derive(input: TokenStream) -> TokenStream {
         }
     });
 
+    let extend_methods = fields.iter().filter_map(|f| {
+        for attr in &f.attrs {
+            if attr.path.segments.len() == 1 && attr.path.segments[0].ident == "builder" {
+                if let Some(TokenTree::Group(g)) = attr.tts.clone().into_iter().next() {
+                    let mut tokens = g.stream().into_iter();
+                    match tokens.next().unwrap() {
+                        TokenTree::Ident(ref i) => assert_eq!(i, "each"),
+                        tt => panic!("expect `each`, found {}", tt),
+                    }
+                    match tokens.next().unwrap() {
+                        TokenTree::Punct(ref p) => assert_eq!(p.as_char(), '='),
+                        tt => panic!("expect `=`, found {}", tt),
+                    }
+                    let arg = match tokens.next().unwrap() {
+                        TokenTree::Literal(l) => l,
+                        tt => panic!("expected string, found{}", tt),
+                    };
+                    match syn::Lit::new(arg) {
+                        syn::Lit::Str(s) => {
+                            let arg = syn::Ident::new(&s.value(), s.span());
+                            return Some(quote! {fn #arg() {}});
+                        }
+                        lit => panic!("expected string, found {:?}", lit),
+                    }
+                }
+            }
+        }
+        None
+    });
+
     let build_fields = fields.iter().map(|f| {
         let name = &f.ident;
         if ty_inner_type(&f.ty).is_some() {
@@ -92,7 +123,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
             #(#optionized,)*
         }
         impl #bident {
-             #(#methods)*
+            #(#methods)*
+            #(#extend_methods)*
             pub fn build(&self) -> Result<#name, Box<dyn std::error::Error>> {
                 Ok(#name {
                     #(#build_fields,)*

@@ -12,9 +12,19 @@ impl Parse for SeqMacroInput {
         let from = syn::Lit::parse(input)?;
         let _dots = <Token![..]>::parse(input)?;
         let to = syn::Lit::parse(input)?;
-        let body = syn::Block::parse(input)?;
-        eprintln!("{:?} {:?} {:?} {:?} {:?}", var, _in, from, _dots, to);
-        eprintln!("{:?}", body);
+        let content;
+        let braces = syn::braced!(content in input);
+
+        // eprintln!("{:?} {:?} {:?} {:?} {:?}", var, _in, from, _dots, braces);
+        let tt = proc_macro2::TokenStream::parse(&content)?;
+        eprintln!("{:?}", var);
+        eprintln!("{:?}", _in);
+        eprintln!("{:?}", from);
+        eprintln!("{:?}", _dots);
+        eprintln!("{:?}", to);
+        eprintln!("{:?}", braces);
+        eprintln!("{:?}", tt);
+
         Ok(SeqMacroInput {})
     }
 }

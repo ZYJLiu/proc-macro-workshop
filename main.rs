@@ -1,12 +1,15 @@
 use sorted::sorted;
 
 #[sorted]
-pub enum Conference {
-    RustBeltRust,
-    RustConf,
-    RustFest,
-    RustLatam,
-    RustRush,
+pub struct Error {
+    kind: ErrorKind,
+    message: String,
+}
+
+enum ErrorKind {
+    Io,
+    Syntax,
+    Eof,
 }
 
 fn main() {}

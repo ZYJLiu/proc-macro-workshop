@@ -1,7 +1,12 @@
-use seq::seq;
+use sorted::sorted;
 
-seq!(N in 0..4 {
-    compile_error!(concat!("error number ", stringify!(N)));
-});
+#[sorted]
+pub enum Conference {
+    RustBeltRust,
+    RustConf,
+    RustFest,
+    RustLatam,
+    RustRush,
+}
 
 fn main() {}

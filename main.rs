@@ -1,15 +1,11 @@
-use sorted::sorted;
+use derive_builder::Builder;
 
-#[sorted]
-pub struct Error {
-    kind: ErrorKind,
-    message: String,
-}
-
-enum ErrorKind {
-    Io,
-    Syntax,
-    Eof,
+#[derive(Builder)]
+pub struct Command {
+    executable: String,
+    args: Vec<String>,
+    env: Vec<String>,
+    current_dir: String,
 }
 
 fn main() {}

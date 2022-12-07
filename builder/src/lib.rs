@@ -16,6 +16,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
             env: Option<Vec<String>>,
             current_dir: Option<String>,
         }
+
         impl #bident {
             pub fn executable(&mut self, executable: String) -> &mut Self {
                 self.executable = Some(executable);
@@ -32,6 +33,17 @@ pub fn derive(input: TokenStream) -> TokenStream {
             pub fn current_dir(&mut self, current_dir: String) -> &mut Self {
                 self.current_dir = Some(current_dir);
                 self
+            }
+
+            pub fn build(&mut self) -> Result<Command, Box<dyn std::error::Error>> {
+                Ok(#name {
+                    executable: self.executable.clone().ok_or("not set")?,
+                    args: self.args.clone().ok_or("not set")?,
+                    env: self.env.clone().ok_or("not set")?,
+                    current_dir: self.current_dir.clone().ok_or("not set")?,
+                }
+
+                )
             }
         }
 

@@ -9,7 +9,9 @@ pub struct Command {
 }
 
 fn main() {
-    let builder = Command::builder();
-
-    let _ = builder;
+    let mut builder = Command::builder();
+    builder.executable("cargo".to_owned());
+    builder.args(vec!["build".to_owned(), "--release".to_owned()]);
+    builder.env(vec![]);
+    builder.current_dir("..".to_owned());
 }

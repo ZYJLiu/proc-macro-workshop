@@ -1,20 +1,11 @@
-use derive_builder::Builder;
+use sorted::sorted;
 
-#[derive(Builder)]
-pub struct Command {
-    executable: String,
-    args: Vec<String>,
-    env: Vec<String>,
-    current_dir: String,
+#[sorted]
+pub enum Error {
+    ThatFailed,
+    ThisFailed,
+    SomethingFailed,
+    WhoKnowsWhatFailed,
 }
 
-fn main() {
-    let mut builder = Command::builder();
-    builder.executable("cargo".to_owned());
-    builder.args(vec!["build".to_owned(), "--release".to_owned()]);
-    builder.env(vec![]);
-    builder.current_dir("..".to_owned());
-
-    let command = builder.build().unwrap();
-    assert_eq!(command.executable, "cargo");
-}
+fn main() {}
